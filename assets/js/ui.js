@@ -50,19 +50,21 @@
     const byFilename = new Map();
     Object.entries(window.AdventureLinks).forEach(([id, info]) => {
       if (info.lowres && info.lowresSrc) {
-        const ext      = info.lowresSrc.match(/\.[^.]+$/)?.[0] || '.jpg';
-        const original = info.lowresSrc.replace(`-lowres${ext}`, ext);
-        const filename = original.split('/').pop();
+        const srcNoQuery = info.lowresSrc.split('?')[0];
+        const ext        = srcNoQuery.match(/\.[^.]+$/)?.[0] || '.jpg';
+        const original   = srcNoQuery.replace(`-lowres${ext}`, ext);
+        const filename   = original.split('/').pop();
         byFilename.set(filename, info);
       }
     });
 
-    // Rewrite data-src on gallery items so lightbox also opens low-res
+    // For low-res gallery items: flag for lightbox handler
     document.querySelectorAll('[data-src]').forEach(el => {
       const filename = el.dataset.src.split('/').pop();
       const info = byFilename.get(filename);
       if (!info) return;
-      el.dataset.src = el.dataset.src.replace(filename, filename.replace(/(\.[^.]+)$/, `-lowres$1`));
+      el.dataset.isLowres = 'true';
+      if (info.url) el.dataset.lowresUrl = info.url;
     });
 
     // Apply low-res to every <img> whose src filename matches
@@ -71,7 +73,9 @@
       const info = byFilename.get(filename);
       if (!info) return;
 
-      img.src = img.src.replace(filename, filename.replace(/(\.[^.]+)$/, `-lowres$1`));
+      const newSrc = img.src.replace(/images\/[^?]+$/, info.lowresSrc);
+      console.log('[lowres] swapping', img.src, '→', newSrc);
+      img.src = newSrc;
       img.classList.add('img-lowres');
 
       // Make the image itself open the purchase URL on click
@@ -392,6 +396,14 @@
   // ── GALLERY LIGHTBOX ──
   document.querySelectorAll('.gallery-item[data-src]').forEach(item => {
     item.addEventListener('click', () => {
+      // Low-res images: open purchase link if available, otherwise block lightbox
+      if (item.dataset.isLowres) {
+        if (item.dataset.lowresUrl) {
+          window.open(item.dataset.lowresUrl, '_blank', 'noopener,noreferrer');
+        }
+        return;
+      }
+
       const src   = item.dataset.src;
       const label = item.dataset.label || '';
 

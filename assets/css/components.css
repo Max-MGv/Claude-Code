@@ -901,13 +901,6 @@ hr.sb-divider {
 
 /* ── LOW-RES IMAGE MODE ── */
 
-.img-lowres {
-  opacity: 0.9;
-}
-
-.container-lowres:hover .img-lowres {
-  opacity: 0.85;
-}
 
 /* ── IMAGE HOVER PREVIEW ── */
 
