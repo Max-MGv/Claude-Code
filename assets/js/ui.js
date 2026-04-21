@@ -74,6 +74,15 @@
       img.src = img.src.replace(filename, filename.replace(/(\.[^.]+)$/, `-lowres$1`));
       img.classList.add('img-lowres');
 
+      // Make the image itself open the purchase URL on click
+      if (info.url) {
+        img.style.cursor = 'pointer';
+        img.addEventListener('click', e => {
+          e.stopPropagation();
+          window.open(info.url, '_blank', 'noopener,noreferrer');
+        });
+      }
+
       // Wrap closest container-like parent for badge + hover class
       const wrap = img.closest('.image-container, .gallery-item, .npc-card') || img.parentElement;
       if (wrap) {
