@@ -249,8 +249,9 @@
     pending = {};
     for (const [, val] of Object.entries(adv.config)) {
       if (val.lowresSrc) {
-        const ext  = val.lowresSrc.match(/\.[^.]+$/)?.[0] || '.jpg';
-        const orig = val.lowresSrc.replace('images/', '').replace(`-lowres${ext}`, ext);
+        const srcNoQuery = val.lowresSrc.split('?')[0];
+        const ext  = srcNoQuery.match(/\.[^.]+$/)?.[0] || '.jpg';
+        const orig = srcNoQuery.replace('images/', '').replace(`-lowres${ext}`, ext);
         pending[orig] = {
           lowres:    !!val.lowres,
           url:       val.url || '',
