@@ -42,31 +42,66 @@
 
   // ── PURCHASE / SOURCE LINKS ──
   // Reads window.AdventureLinks (set by each adventure's links.js).
-  // Any element with a matching data-link-id gets a source badge.
-  // If lowres: true, the image src is swapped to the degraded copy + blur applied.
+  // Applies low-res swap + blur to ALL uses of a marked image across the page,
+  // not just the named container. Also adds a source badge to named containers.
   if (window.AdventureLinks) {
+    // Build a map of original filename → info for low-res lookup
+    // e.g. "boss-room.jpg" → { lowres, lowresSrc, url, credit }
+    const byFilename = new Map();
     Object.entries(window.AdventureLinks).forEach(([id, info]) => {
+      if (info.lowres && info.lowresSrc) {
+        const ext      = info.lowresSrc.match(/\.[^.]+$/)?.[0] || '.jpg';
+        const original = info.lowresSrc.replace(`-lowres${ext}`, ext);
+        const filename = original.split('/').pop();
+        byFilename.set(filename, info);
+      }
+    });
+
+    // Rewrite data-src on gallery items so lightbox also opens low-res
+    document.querySelectorAll('[data-src]').forEach(el => {
+      const filename = el.dataset.src.split('/').pop();
+      const info = byFilename.get(filename);
+      if (!info) return;
+      el.dataset.src = el.dataset.src.replace(filename, filename.replace(/(\.[^.]+)$/, `-lowres$1`));
+    });
+
+    // Apply low-res to every <img> whose src filename matches
+    document.querySelectorAll('img').forEach(img => {
+      const filename = img.src.split('/').pop();
+      const info = byFilename.get(filename);
+      if (!info) return;
+
+      img.src = img.src.replace(filename, filename.replace(/(\.[^.]+)$/, `-lowres$1`));
+      img.classList.add('img-lowres');
+
+      // Wrap closest container-like parent for badge + hover class
+      const wrap = img.closest('.image-container, .gallery-item, .npc-card') || img.parentElement;
+      if (wrap) {
+        wrap.classList.add('container-lowres');
+        if (info.url && !wrap.querySelector('.purchase-badge')) {
+          const badge = document.createElement('a');
+          badge.className = 'purchase-badge';
+          badge.href = info.url;
+          badge.target = '_blank';
+          badge.rel = 'noopener noreferrer';
+          badge.textContent = info.credit ? `Buy full art: ${info.credit} \u2197` : 'Buy full art \u2197';
+          wrap.style.position = 'relative';
+          wrap.appendChild(badge);
+        }
+      }
+    });
+
+    // Also handle named containers for source-only badges (lowres: false but has url)
+    Object.entries(window.AdventureLinks).forEach(([id, info]) => {
+      if (info.lowres || !info.url) return;
       const container = document.querySelector(`[data-link-id="${id}"]`);
       if (!container) return;
-
-      if (info.lowres && info.lowresSrc) {
-        const img = container.querySelector('img');
-        if (img) {
-          img.src = info.lowresSrc;
-          img.classList.add('img-lowres');
-        }
-        container.classList.add('container-lowres');
-      }
-
-      if (!info.url) return;
       const badge = document.createElement('a');
       badge.className = 'purchase-badge';
       badge.href = info.url;
       badge.target = '_blank';
       badge.rel = 'noopener noreferrer';
-      badge.textContent = info.lowres
-        ? (info.credit ? `Buy full art: ${info.credit} \u2197` : 'Buy full art \u2197')
-        : (info.credit ? `Source: ${info.credit} \u2197` : 'Source \u2197');
+      badge.textContent = info.credit ? `Source: ${info.credit} \u2197` : 'Source \u2197';
       container.appendChild(badge);
     });
   }

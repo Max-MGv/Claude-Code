@@ -6,8 +6,6 @@ window.AdventureLinks = {
     lowresSrc: "images/locations/bakery-lowres.jpg"
   },
   "boss-room": {
-    url: "epeku.com/fantasy/scenes/pastoral-village-stables",
-    credit: "cze pekus",
     lowres: true,
     lowresSrc: "images/locations/boss-room-lowres.jpg"
   }
