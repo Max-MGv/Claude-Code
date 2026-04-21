@@ -64,9 +64,9 @@ Served by the Express server. Single page:
 |---|-------|--------|
 | 1 | Server scaffold + image API (`/api/adventures`, `/api/lowres`, `/api/save`) | ✅ Done |
 | 2 | Admin UI — adventure selector + image grid + toggles | ✅ Done |
-| 3 | Preview — iframe showing adventure page with pending config | Not started |
+| 3 | Preview — iframe showing adventure page with pending config | Skipped — localhost:3001 serves live preview |
 | 4 | `ui.js` update — low-res swap + blur on page load | ✅ Done |
-| 5 | Publish — `/api/publish` git integration + publish button | Not started |
+| 5 | Publish — `/api/publish` git integration + publish button | ✅ Done |
 
 ---
 
