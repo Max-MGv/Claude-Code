@@ -145,12 +145,15 @@ app.post('/api/save', (req, res) => {
   }
 });
 
-// Publish: git add + commit + push
+// Publish: git add + commit (if anything changed) + push
 app.post('/api/publish', (req, res) => {
   try {
     const { message = 'Admin: update image config' } = req.body;
     execSync('git add -A', { cwd: REPO });
-    execSync(`git commit -m ${JSON.stringify(message)}`, { cwd: REPO });
+    const status = execSync('git status --porcelain', { cwd: REPO }).toString().trim();
+    if (status) {
+      execSync(`git commit -m ${JSON.stringify(message)}`, { cwd: REPO });
+    }
     execSync('git push', { cwd: REPO });
     res.json({ ok: true });
   } catch (err) {
