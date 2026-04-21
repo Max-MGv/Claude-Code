@@ -1,0 +1,46 @@
+/* ============================================================
+   theme.css — Design tokens and base reset
+   Edit here to change colors or typography site-wide.
+   ============================================================ */
+
+:root {
+  /* Backgrounds */
+  --parchment:      #f4ead5;
+  --parchment-dark: #e8d9b8;
+  --page-bg:        #1a0f05;
+
+  /* Text */
+  --ink:            #2c1a0e;
+  --ink-light:      #5c3d1e;
+
+  /* Accent */
+  --red:            #8b1a1a;
+  --gold:           #a07830;
+  --gold-light:     #c9a84c;
+  --rule-color:     #a07830;
+
+  /* Semantic */
+  --blue:           #1a3a5c;
+  --green:          #1a4a2a;
+
+  /* Sidebar */
+  --sidebar-bg:     #2c1a0e;
+  --sidebar-text:   #e8d9b8;
+
+  /* Utility */
+  --shadow:         rgba(44, 26, 14, 0.25);
+}
+
+/* Base reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Root typography */
+body {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background: var(--page-bg);
+  color: var(--ink);
+}

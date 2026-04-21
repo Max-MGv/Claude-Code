@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(reg query:*)",
+      "WebSearch",
+      "Read(//c/Users/Max/Desktop/Obsidian/DnD Backup/backup Golden Hour/3-Mechanics/**)",
+      "Read(//c/Users/Max/Desktop/Obsidian/DnD Backup/backup Golden Hour/Game/**)",
+      "Bash(node -e \"require\\('./assets/js/dnd-terms.js'\\)\")",
+      "Bash(node --input-type=module)",
+      "Bash(node --check \"C:/Users/Max/Desktop/Claude Code/assets/js/dnd-terms.js\")",
+      "Bash(node --check \"C:\\\\Users\\\\Max\\\\Desktop\\\\Claude Code\\\\assets\\\\js\\\\dnd-terms.js\")",
+      "Bash(node --check \"C:\\\\Users\\\\Max\\\\Desktop\\\\Claude Code\\\\assets\\\\js\\\\ui.js\")",
+      "Bash(pkill -f \"node server.js\")",
+      "Bash(node server.js)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s http://localhost:3001/api/adventures)"
+    ]
+  }
+}

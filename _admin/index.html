@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adventure Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #111;
+      color: #ddd;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1a1a;
+      border-bottom: 2px solid #8b1a1a;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    header h1 { font-size: 1.1rem; color: #c9a84c; letter-spacing: 0.05em; }
+
+    select {
+      background: #222;
+      color: #ddd;
+      border: 1px solid #444;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .header-actions { margin-left: auto; display: flex; gap: 0.75rem; }
+
+    button {
+      padding: 0.4rem 1rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-save    { background: #1a4a2a; color: #7dda8a; }
+    .btn-save:hover    { background: #1e5a32; }
+    .btn-publish { background: #8b1a1a; color: #f4c4c4; }
+    .btn-publish:hover { background: #a02020; }
+    .btn-save:disabled, .btn-publish:disabled { opacity: 0.4; cursor: default; }
+
+    #status {
+      font-size: 0.8rem;
+      color: #888;
+      padding: 0 2rem;
+      line-height: 2.8rem;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.2rem;
+      padding: 2rem;
+    }
+
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.15s;
+    }
+
+    .card.is-lowres { border-color: #a07830; }
+
+    .card-thumb {
+      height: 160px;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-thumb .thumb-badge {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      font-size: 0.68rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .badge-normal  { background: #1a4a2a; color: #7dda8a; }
+    .badge-lowres  { background: #a07830; color: #f4ead5; }
+    .badge-working { background: #333; color: #aaa; }
+
+    .card-body { padding: 0.9rem 1rem 1.1rem; flex: 1; display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .card-name {
+      font-size: 0.78rem;
+      color: #999;
+      word-break: break-all;
+    }
+
+    .toggle-row { display: flex; gap: 0.5rem; }
+
+    .btn-toggle-normal {
+      flex: 1;
+      background: #222;
+      color: #888;
+      border: 1px solid #333;
+      font-size: 0.78rem;
+      padding: 0.35rem 0;
+    }
+
+    .btn-toggle-normal.active {
+      background: #1a4a2a;
+      color: #7dda8a;
+      border-color: #1a4a2a;
+    }
+
+    .btn-toggle-lowres {
+      flex: 1;
+      background: #222;
+      color: #888;
+      border: 1px solid #333;
+      font-size: 0.78rem;
+      padding: 0.35rem 0;
+    }
+
+    .btn-toggle-lowres.active {
+      background: #6b4a10;
+      color: #f4c87a;
+      border-color: #a07830;
+    }
+
+    .lowres-fields { display: flex; flex-direction: column; gap: 0.45rem; }
+
+    .lowres-fields input {
+      background: #222;
+      border: 1px solid #444;
+      color: #ddd;
+      padding: 0.4rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      width: 100%;
+    }
+
+    .lowres-fields input::placeholder { color: #555; }
+    .lowres-fields input:focus { outline: none; border-color: #a07830; }
+
+    .lowres-fields label {
+      font-size: 0.7rem;
+      color: #666;
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+
+    .lowres-fields select {
+      background: #222;
+      border: 1px solid #444;
+      color: #ddd;
+      padding: 0.4rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      width: 100%;
+    }
+
+    .lowres-fields select:focus { outline: none; border-color: #a07830; }
+
+    .generating { font-size: 0.75rem; color: #a07830; font-style: italic; }
+    .gen-error  { font-size: 0.75rem; color: #cc4444; }
+    .gen-ok     { font-size: 0.75rem; color: #4aaa60; }
+
+    #empty { padding: 3rem 2rem; color: #555; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⚔ Adventure Admin</h1>
+  <select id="adv-select">
+    <option value="">— select adventure —</option>
+  </select>
+  <div class="header-actions">
+    <button class="btn-save"    id="btn-save"    disabled>Save</button>
+    <button class="btn-publish" id="btn-publish" disabled>Publish to GitHub</button>
+  </div>
+</header>
+
+<div id="status"></div>
+<div id="grid"><div id="empty">Select an adventure to begin.</div></div>
+
+<script>
+  const API = 'http://localhost:3001';
+
+  let adventures = [];
+  let current    = null;
+  let linkIds    = [];    // data-link-id values found in the adventure HTML
+  let pending    = {};    // { imagePath: { containerId, lowres, url, credit, lowresSrc } }
+  let dirty      = false;
+
+  // ── boot ──────────────────────────────────────────────────────────────────
+
+  async function boot() {
+    setStatus('Loading...');
+    try {
+      adventures = await fetchJSON('/api/adventures');
+      const sel = document.getElementById('adv-select');
+      adventures.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.name;
+        opt.textContent = a.name;
+        sel.appendChild(opt);
+      });
+      setStatus('');
+    } catch (e) {
+      setStatus('Error: could not reach server. Is it running?');
+    }
+  }
+
+  // ── adventure selection ───────────────────────────────────────────────────
+
+  document.getElementById('adv-select').addEventListener('change', e => {
+    current = e.target.value;
+    if (!current) { clearGrid(); return; }
+
+    const adv = adventures.find(a => a.name === current);
+    linkIds = adv.linkIds || [];
+
+    // Seed pending from existing saved config.
+    // Config is keyed by containerId; we back-derive imagePath from lowresSrc.
+    pending = {};
+    for (const [containerId, val] of Object.entries(adv.config)) {
+      if (val.lowresSrc) {
+        const ext  = val.lowresSrc.match(/\.[^.]+$/)?.[0] || '.jpg';
+        const orig = val.lowresSrc.replace('images/', '').replace(`-lowres${ext}`, ext);
+        pending[orig] = {
+          containerId,
+          lowres:    !!val.lowres,
+          url:       val.url || '',
+          credit:    val.credit || '',
+          lowresSrc: val.lowresSrc,
+        };
+      }
+    }
+
+    setDirty(false);
+    renderGrid(adv);
+  });
+
+  // ── grid ──────────────────────────────────────────────────────────────────
+
+  function renderGrid(adv) {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    if (!adv.images.length) {
+      grid.innerHTML = '<div id="empty">No images found for this adventure.</div>';
+      return;
+    }
+    adv.images.forEach(imgPath => grid.appendChild(makeCard(adv.name, imgPath)));
+  }
+
+  function makeCard(advName, imgPath) {
+    const p    = pending[imgPath] || { containerId: '', lowres: false, url: '', credit: '', lowresSrc: null };
+    const isLR = p.lowres;
+
+    const card = document.createElement('div');
+    card.className = `card${isLR ? ' is-lowres' : ''}`;
+
+    // ── thumbnail ──
+    const thumb = document.createElement('div');
+    thumb.className = 'card-thumb';
+    const img = document.createElement('img');
+    img.src = `${API}/adventures/${advName}/images/${imgPath}`;
+    img.alt = imgPath;
+    thumb.appendChild(img);
+    const badge = document.createElement('span');
+    badge.className = `thumb-badge ${isLR ? 'badge-lowres' : 'badge-normal'}`;
+    badge.textContent = isLR ? 'Low-res' : 'Normal';
+    thumb.appendChild(badge);
+    card.appendChild(thumb);
+
+    // ── body ──
+    const body = document.createElement('div');
+    body.className = 'card-body';
+
+    const nameLine = document.createElement('div');
+    nameLine.className = 'card-name';
+    nameLine.textContent = imgPath;
+    body.appendChild(nameLine);
+
+    // Container ID dropdown
+    const containerLabel = document.createElement('label');
+    containerLabel.textContent = 'Page container (data-link-id)';
+    containerLabel.style.cssText = 'font-size:0.7rem;color:#666;display:block;margin-bottom:0.15rem;margin-top:0.4rem;';
+    const containerSel = document.createElement('select');
+    const blankOpt = document.createElement('option');
+    blankOpt.value = '';
+    blankOpt.textContent = linkIds.length ? '— select container —' : '(none found in HTML)';
+    containerSel.appendChild(blankOpt);
+    linkIds.forEach(id => {
+      const opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = id;
+      if (id === p.containerId) opt.selected = true;
+      containerSel.appendChild(opt);
+    });
+    body.appendChild(containerLabel);
+    body.appendChild(containerSel);
+
+    // Normal / Low-res toggle
+    const toggleRow = document.createElement('div');
+    toggleRow.className = 'toggle-row';
+    toggleRow.style.marginTop = '0.5rem';
+    const btnNormal = document.createElement('button');
+    btnNormal.className = `btn-toggle-normal${!isLR ? ' active' : ''}`;
+    btnNormal.textContent = 'Normal';
+    const btnLowres = document.createElement('button');
+    btnLowres.className = `btn-toggle-lowres${isLR ? ' active' : ''}`;
+    btnLowres.textContent = 'Low-res';
+    toggleRow.appendChild(btnNormal);
+    toggleRow.appendChild(btnLowres);
+    body.appendChild(toggleRow);
+
+    // Low-res fields
+    const fields = document.createElement('div');
+    fields.className = 'lowres-fields';
+    fields.style.display = isLR ? 'flex' : 'none';
+
+    const genLine = document.createElement('div');
+    genLine.className = 'gen-ok';
+    genLine.style.display = p.lowresSrc ? 'block' : 'none';
+    genLine.textContent = p.lowresSrc ? 'Low-res file ready.' : '';
+    fields.appendChild(genLine);
+
+    const urlLabel = document.createElement('label');
+    urlLabel.textContent = 'Purchase / source URL';
+    const urlInput = document.createElement('input');
+    urlInput.type = 'url';
+    urlInput.placeholder = 'https://...';
+    urlInput.value = p.url || '';
+
+    const creditLabel = document.createElement('label');
+    creditLabel.textContent = 'Credit label (optional)';
+    const creditInput = document.createElement('input');
+    creditInput.type = 'text';
+    creditInput.placeholder = 'e.g. Czepeku';
+    creditInput.value = p.credit || '';
+
+    fields.appendChild(urlLabel);
+    fields.appendChild(urlInput);
+    fields.appendChild(creditLabel);
+    fields.appendChild(creditInput);
+    body.appendChild(fields);
+    card.appendChild(body);
+
+    // ── events ──
+
+    containerSel.addEventListener('change', () => {
+      ensurePending(imgPath).containerId = containerSel.value;
+      setDirty(true);
+    });
+
+    urlInput.addEventListener('input', () => {
+      ensurePending(imgPath).url = urlInput.value;
+      setDirty(true);
+    });
+
+    creditInput.addEventListener('input', () => {
+      ensurePending(imgPath).credit = creditInput.value;
+      setDirty(true);
+    });
+
+    btnNormal.addEventListener('click', () => {
+      pending[imgPath] = { containerId: containerSel.value, lowres: false, url: '', credit: '', lowresSrc: null };
+      setDirty(true);
+      card.replaceWith(makeCard(advName, imgPath));
+    });
+
+    btnLowres.addEventListener('click', async () => {
+      if (pending[imgPath]?.lowres) return;
+      badge.className = 'thumb-badge badge-working';
+      badge.textContent = 'Working…';
+      btnLowres.disabled = true;
+      fields.style.display = 'flex';
+      genLine.style.display = 'block';
+      genLine.className = 'generating';
+      genLine.textContent = 'Generating low-res copy…';
+
+      try {
+        const result = await fetchJSON('/api/lowres', 'POST', { adventure: advName, imagePath: imgPath });
+        pending[imgPath] = {
+          containerId: containerSel.value,
+          lowres:      true,
+          url:         pending[imgPath]?.url || '',
+          credit:      pending[imgPath]?.credit || '',
+          lowresSrc:   result.lowresSrc,
+        };
+        setDirty(true);
+        genLine.className = 'gen-ok';
+        genLine.textContent = 'Low-res file ready.';
+        card.replaceWith(makeCard(advName, imgPath));
+      } catch (err) {
+        genLine.className = 'gen-error';
+        genLine.textContent = `Error: ${err.message}`;
+        badge.className = 'thumb-badge badge-normal';
+        badge.textContent = 'Normal';
+        btnLowres.disabled = false;
+      }
+    });
+
+    return card;
+  }
+
+  function clearGrid() {
+    document.getElementById('grid').innerHTML = '<div id="empty">Select an adventure to begin.</div>';
+    setDirty(false);
+  }
+
+  // ── save ──────────────────────────────────────────────────────────────────
+
+  document.getElementById('btn-save').addEventListener('click', async () => {
+    if (!current) return;
+    setStatus('Saving…');
+    try {
+      const config = {};
+      for (const [imgPath, val] of Object.entries(pending)) {
+        if (!val.lowres && !val.url) continue;
+        const id = val.containerId || imgPath.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+        config[id] = {
+          url:       val.url      || undefined,
+          credit:    val.credit   || undefined,
+          lowres:    val.lowres   || undefined,
+          lowresSrc: val.lowresSrc || undefined,
+        };
+      }
+      await fetchJSON('/api/save', 'POST', { adventure: current, config });
+      setDirty(false);
+      setStatus('Saved. Open the adventure page to preview changes.');
+      document.getElementById('btn-publish').disabled = false;
+    } catch (e) {
+      setStatus(`Save failed: ${e.message}`);
+    }
+  });
+
+  // ── publish ───────────────────────────────────────────────────────────────
+
+  document.getElementById('btn-publish').addEventListener('click', async () => {
+    if (!confirm('Push changes to GitHub?')) return;
+    setStatus('Publishing…');
+    try {
+      await fetchJSON('/api/publish', 'POST', { message: `Admin: update image config for ${current}` });
+      setStatus('Published to GitHub.');
+    } catch (e) {
+      setStatus(`Publish failed: ${e.message}`);
+    }
+  });
+
+  // ── helpers ───────────────────────────────────────────────────────────────
+
+  function ensurePending(imgPath) {
+    if (!pending[imgPath]) pending[imgPath] = { containerId: '', lowres: false, url: '', credit: '', lowresSrc: null };
+    return pending[imgPath];
+  }
+
+  function setDirty(val) {
+    dirty = val;
+    document.getElementById('btn-save').disabled = !val;
+  }
+
+  function setStatus(msg) {
+    document.getElementById('status').textContent = msg;
+  }
+
+  async function fetchJSON(endpoint, method = 'GET', body = null) {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(API + endpoint, opts);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.statusText);
+    return data;
+  }
+
+  boot();
+</script>
+</body>
+</html>

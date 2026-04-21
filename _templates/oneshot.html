@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<!--
+  _templates/oneshot.html — Blank oneshot shell.
+
+  USAGE: Copy to adventures/[adventure-name]/index.html
+  and fill in the content sections below.
+
+  CSS paths are relative to adventures/[name]/ (two levels deep).
+  Do NOT add <style> blocks or inline styles — edit shared files in assets/ instead.
+  Do NOT add <script> blocks — add behaviour to assets/js/ui.js instead.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><!-- ADVENTURE NAME --> — One Shot</title>
+  <link rel="stylesheet" href="../../assets/css/theme.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     SIDEBAR — update links to match sections on this page
+     ══════════════════════════════════════════════════════════ -->
+<nav id="sidebar">
+  <div id="sidebar-header">
+    <div class="title"><!-- ADVENTURE NAME --></div>
+    <div class="subtitle">One-Shot Adventure</div>
+  </div>
+  <nav>
+    <span class="section-label">Overview</span>
+    <a href="#intro">Introduction</a>
+    <a href="#dm-info">DM Info</a>
+    <a href="#hook">Hook</a>
+    <a href="#npcs">NPCs</a>
+    <a href="#clues">Clues</a>
+    <a href="#flow">Adventure Flow</a>
+    <a href="#outcomes">Outcome Branches</a>
+
+    <span class="section-label">Locations</span>
+    <!-- ADD ONE LINK PER LOCATION SECTION, e.g.:
+    <a href="#entrance">Temple Entrance</a>
+    <a href="#first-chamber">Chamber 1</a>
+    <a href="#boss-chamber">Boss Chamber</a>
+    -->
+
+    <span class="section-label">Reference</span>
+    <a href="#magic-items">Magic Items</a>
+    <a href="#battlefield">Battlefield Actions</a>
+    <a href="#references">References</a>
+  </nav>
+</nav>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     MAIN CONTENT
+     ══════════════════════════════════════════════════════════ -->
+<main id="main">
+
+  <!-- PAGE TITLE BLOCK ─────────────────────────────────────── -->
+  <div class="page-title">
+    <h1><!-- ADVENTURE NAME --></h1>
+    <p class="tagline"><!-- One-line flavour tagline --></p>
+    <div class="meta">
+      <span>📍 <!-- Location --></span>
+      <span>⚔️ <!-- Level range e.g. "Level 3–5" --></span>
+      <span>⏱ <!-- Session length e.g. "One Session" --></span>
+      <span>👥 <!-- Players e.g. "3–5 Players" --></span>
+    </div>
+  </div>
+
+
+  <!-- SECTION: INTRODUCTION ───────────────────────────────── -->
+  <!-- Player-facing. What the world looks like before play. -->
+  <div class="section" id="intro">
+    <div class="section-header">
+      <span class="icon">📜</span>
+      <h2>Introduction</h2>
+    </div>
+    <div class="section-body">
+
+      <div class="read-aloud">
+        <div class="ra-label">Read or paraphrase to players</div>
+        <p><!-- Opening world/setting description. --></p>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- SECTION: DM INFO ────────────────────────────────────── -->
+  <!-- Hidden from players. Villain motivation, hidden mechanics,
+       win/lose/partial conditions. -->
+  <div class="section" id="dm-info">
+    <div class="section-header">
+      <span class="icon">🔮</span>
+      <h2>DM Info — The Truth</h2>
+      <span class="badge">Hidden from Players</span>
+    </div>
+    <div class="section-body">
+
+      <div class="callout dm-note">
+        <div class="callout-title">The Real Plot</div>
+        <p><!-- What is actually going on. --></p>
+      </div>
+
+      <!-- Add h3 subsections as needed, e.g.:
+      <h3>Win Condition</h3>
+      <h3>Failure Condition</h3>
+      -->
+
+    </div>
+  </div>
+
+
+  <!-- SECTION: HOOK ───────────────────────────────────────── -->
+  <!-- How players are drawn in. Opening scene. -->
+  <div class="section" id="hook">
+    <div class="section-header">
+      <span class="icon">🪝</span>
+      <h2>Hook</h2>
+    </div>
+    <div class="section-body">
+
+      <div class="read-aloud">
+        <div class="ra-label">Scene</div>
+        <p><!-- Opening scene description. --></p>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- SECTION: NPCS ───────────────────────────────────────── -->
+  <!-- One .npc-card per named NPC. -->
+  <div class="section" id="npcs">
+    <div class="section-header">
+      <span class="icon">🎭</span>
+      <h2>NPCs</h2>
+    </div>
+    <div class="section-body">
+      <div class="npc-grid">
+
+        <!-- NPC CARD EXAMPLE (villain with image):
+        <div class="npc-card villain">
+          <img class="npc-img" src="images/npcs/name.jpg" alt="Name">
+          <div class="npc-name">Full Name</div>
+          <div class="npc-role">
+            <span class="tag tag-villain">Villain</span>
+            Role description
+          </div>
+          <p>Physical description and personality.</p>
+          <p>What they want and what they're hiding.</p>
+          <div class="stat-block">
+            <strong>Statblock:</strong> Use Mage statblock<br>
+            <strong>Tactics:</strong> ...
+          </div>
+        </div>
+        -->
+
+        <!-- NPC CARD EXAMPLE (ally, no image yet):
+        <div class="npc-card ally">
+          <!- IMAGE: portrait of Name ->
+          <div class="npc-name">Full Name</div>
+          <div class="npc-role">
+            <span class="tag tag-ally">Ally</span>
+            Role description
+          </div>
+          <p>Description.</p>
+        </div>
+        -->
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION: CLUES & INVESTIGATION ─────────────────────── -->
+  <div class="section" id="clues">
+    <div class="section-header">
+      <span class="icon">🔍</span>
+      <h2>Clues &amp; Investigation</h2>
+    </div>
+    <div class="section-body">
+
+      <!-- Use .stat-pill for skill checks:
+      <span class="stat-pill check">Perception DC 13</span>
+      <span class="stat-pill dc">DEX DC 15</span>
+      -->
+
+    </div>
+  </div>
+
+
+  <!-- SECTION: ADVENTURE FLOW ─────────────────────────────── -->
+  <!-- 5-room structure using .room-list. -->
+  <div class="section" id="flow">
+    <div class="section-header">
+      <span class="icon">🗺</span>
+      <h2>Adventure Flow</h2>
+    </div>
+    <div class="section-body">
+      <div class="room-list">
+
+        <div class="room">
+          <div class="room-number">1</div>
+          <div class="room-content">
+            <div class="room-title"><!-- Room name --></div>
+            <div class="room-body"><!-- Description. --></div>
+          </div>
+        </div>
+
+        <div class="room">
+          <div class="room-number">2</div>
+          <div class="room-content">
+            <div class="room-title"><!-- Room name --></div>
+            <div class="room-body"><!-- Description. --></div>
+          </div>
+        </div>
+
+        <div class="room">
+          <div class="room-number">3</div>
+          <div class="room-content">
+            <div class="room-title"><!-- Room name --></div>
+            <div class="room-body"><!-- Description. --></div>
+          </div>
+        </div>
+
+        <div class="room">
+          <div class="room-number">4</div>
+          <div class="room-content">
+            <div class="room-title"><!-- Room name --></div>
+            <div class="room-body"><!-- Description. --></div>
+          </div>
+        </div>
+
+        <div class="room">
+          <div class="room-number">5</div>
+          <div class="room-content">
+            <div class="room-title"><!-- Room name --></div>
+            <div class="room-body"><!-- Description. --></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION: OUTCOME BRANCHES ───────────────────────────── -->
+  <div class="section" id="outcomes">
+    <div class="section-header">
+      <span class="icon">⚖️</span>
+      <h2>Outcome Branches</h2>
+    </div>
+    <div class="section-body">
+      <div class="outcome-grid">
+
+        <div class="outcome early">
+          <div class="outcome-label">Early Discovery</div>
+          <p><!-- What happens if players figure it out quickly. --></p>
+        </div>
+
+        <div class="outcome late">
+          <div class="outcome-label">Late Realization</div>
+          <p><!-- What happens if players are delayed. --></p>
+        </div>
+
+        <div class="outcome fail">
+          <div class="outcome-label">Failure</div>
+          <p><!-- What happens if players fail entirely. --></p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- LOCATION SECTIONS ───────────────────────────────────── -->
+  <!-- One .section per named location. Duplicate as needed.
+       Add matching <a href="#id"> links in the sidebar above. -->
+
+  <div class="section" id="location-name">
+    <div class="section-header">
+      <span class="icon">🏛</span>
+      <h2><!-- Location Name --></h2>
+    </div>
+    <div class="section-body">
+
+      <!-- IMAGE: location art or battlemap (add when available)
+      <div class="image-reveal">
+        <button class="image-toggle">Show Location Art</button>
+        <div class="image-container" data-link-id="location-name">
+          <img src="images/locations/name.jpg" alt="Location Name">
+          <p class="image-caption">Caption</p>
+        </div>
+      </div>
+      -->
+
+      <div class="read-aloud">
+        <div class="ra-label">Read aloud</div>
+        <p><!-- Room description. --></p>
+      </div>
+
+      <!-- Mechanic callouts, developments, puzzles... -->
+
+    </div>
+  </div>
+
+
+  <!-- SECTION: MAGIC ITEMS ────────────────────────────────── -->
+  <div class="section" id="magic-items">
+    <div class="section-header">
+      <span class="icon">✨</span>
+      <h2>Magic Items</h2>
+    </div>
+    <div class="section-body">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>d10</th>
+            <th>Item</th>
+            <th>Effect</th>
+            <th>Charges</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- <tr><td>1</td><td><strong>Item Name</strong></td><td>Effect.</td><td>1 use</td></tr> -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <!-- SECTION: BATTLEFIELD ACTIONS ────────────────────────── -->
+  <div class="section" id="battlefield">
+    <div class="section-header">
+      <span class="icon">⚡</span>
+      <h2>Battlefield Actions</h2>
+    </div>
+    <div class="section-body">
+
+      <div class="callout mechanic">
+        <div class="callout-title">How It Works</div>
+        <p><strong>Tell Phase</strong> — starts at the <em>end</em> of the boss's turn. No damage, just a signal.<br>
+        <strong>Resolution Phase</strong> — triggers at the <em>start</em> of the boss's next turn. Players have one full initiative cycle to react.</p>
+      </div>
+
+      <!-- BA CARD EXAMPLE:
+      <details class="ba-card">
+        <summary><span>Action Name</span></summary>
+        <div class="ba-body">
+          <div class="ba-phase">
+            <span class="ba-label tell">Tell</span>
+            <span class="ba-text">Description of what players see.</span>
+          </div>
+          <div class="ba-phase">
+            <span class="ba-label neutralize">Neutralize</span>
+            <span class="ba-text">How players can stop it.</span>
+          </div>
+          <div class="ba-phase">
+            <span class="ba-label resolution">Resolution</span>
+            <span class="ba-text">What happens if not stopped.</span>
+          </div>
+        </div>
+      </details>
+      -->
+
+    </div>
+  </div>
+
+
+  <!-- SECTION: REFERENCES ─────────────────────────────────── -->
+  <div class="section" id="references">
+    <div class="section-header">
+      <span class="icon">📚</span>
+      <h2>References</h2>
+    </div>
+    <div class="section-body">
+      <!-- Statblocks, external links, additional material. -->
+    </div>
+  </div>
+
+
+</main>
+
+<a href="#" id="top-btn" title="Back to top">↑</a>
+<script src="links.js"></script>
+<script src="../../assets/js/dnd-terms.js"></script>
+<script src="../../assets/js/ui.js"></script>
+</body>
+</html>
