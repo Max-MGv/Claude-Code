@@ -245,15 +245,13 @@
     const adv = adventures.find(a => a.name === current);
     linkIds = adv.linkIds || [];
 
-    // Seed pending from existing saved config.
-    // Config is keyed by containerId; we back-derive imagePath from lowresSrc.
+    // Seed pending from existing saved config, back-deriving imagePath from lowresSrc.
     pending = {};
-    for (const [containerId, val] of Object.entries(adv.config)) {
+    for (const [, val] of Object.entries(adv.config)) {
       if (val.lowresSrc) {
         const ext  = val.lowresSrc.match(/\.[^.]+$/)?.[0] || '.jpg';
         const orig = val.lowresSrc.replace('images/', '').replace(`-lowres${ext}`, ext);
         pending[orig] = {
-          containerId,
           lowres:    !!val.lowres,
           url:       val.url || '',
           credit:    val.credit || '',
@@ -279,7 +277,7 @@
   }
 
   function makeCard(advName, imgPath) {
-    const p    = pending[imgPath] || { containerId: '', lowres: false, url: '', credit: '', lowresSrc: null };
+    const p    = pending[imgPath] || { lowres: false, url: '', credit: '', lowresSrc: null };
     const isLR = p.lowres;
 
     const card = document.createElement('div');
@@ -306,25 +304,6 @@
     nameLine.className = 'card-name';
     nameLine.textContent = imgPath;
     body.appendChild(nameLine);
-
-    // Container ID dropdown
-    const containerLabel = document.createElement('label');
-    containerLabel.textContent = 'Page container (data-link-id)';
-    containerLabel.style.cssText = 'font-size:0.7rem;color:#666;display:block;margin-bottom:0.15rem;margin-top:0.4rem;';
-    const containerSel = document.createElement('select');
-    const blankOpt = document.createElement('option');
-    blankOpt.value = '';
-    blankOpt.textContent = linkIds.length ? '— select container —' : '(none found in HTML)';
-    containerSel.appendChild(blankOpt);
-    linkIds.forEach(id => {
-      const opt = document.createElement('option');
-      opt.value = id;
-      opt.textContent = id;
-      if (id === p.containerId) opt.selected = true;
-      containerSel.appendChild(opt);
-    });
-    body.appendChild(containerLabel);
-    body.appendChild(containerSel);
 
     // Normal / Low-res toggle
     const toggleRow = document.createElement('div');
@@ -374,11 +353,6 @@
 
     // ── events ──
 
-    containerSel.addEventListener('change', () => {
-      ensurePending(imgPath).containerId = containerSel.value;
-      setDirty(true);
-    });
-
     urlInput.addEventListener('input', () => {
       ensurePending(imgPath).url = urlInput.value;
       setDirty(true);
@@ -390,7 +364,7 @@
     });
 
     btnNormal.addEventListener('click', () => {
-      pending[imgPath] = { containerId: containerSel.value, lowres: false, url: '', credit: '', lowresSrc: null };
+      pending[imgPath] = { lowres: false, url: '', credit: '', lowresSrc: null };
       setDirty(true);
       card.replaceWith(makeCard(advName, imgPath));
     });
@@ -408,8 +382,7 @@
       try {
         const result = await fetchJSON('/api/lowres', 'POST', { adventure: advName, imagePath: imgPath });
         pending[imgPath] = {
-          containerId: containerSel.value,
-          lowres:      true,
+          lowres: true,
           url:         pending[imgPath]?.url || '',
           credit:      pending[imgPath]?.credit || '',
           lowresSrc:   result.lowresSrc,
@@ -444,7 +417,7 @@
       const config = {};
       for (const [imgPath, val] of Object.entries(pending)) {
         if (!val.lowres && !val.url) continue;
-        const id = val.containerId || imgPath.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+        const id = imgPath.replace(/[^a-z0-9]/gi, '-').toLowerCase();
         config[id] = {
           url:       val.url      || undefined,
           credit:    val.credit   || undefined,
@@ -477,7 +450,7 @@
   // ── helpers ───────────────────────────────────────────────────────────────
 
   function ensurePending(imgPath) {
-    if (!pending[imgPath]) pending[imgPath] = { containerId: '', lowres: false, url: '', credit: '', lowresSrc: null };
+    if (!pending[imgPath]) pending[imgPath] = { lowres: false, url: '', credit: '', lowresSrc: null };
     return pending[imgPath];
   }
 
