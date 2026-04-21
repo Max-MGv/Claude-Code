@@ -7,7 +7,7 @@ window.AdventureLinks = {
   },
   "boss-room": {
     url: "epeku.com/fantasy/scenes/pastoral-village-stables",
-    credit: "cze peku",
+    credit: "cze pekus",
     lowres: true,
     lowresSrc: "images/locations/boss-room-lowres.jpg"
   }

@@ -12,8 +12,8 @@ const ADV_DIR = path.join(REPO, 'adventures');
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(__dirname));           // serves admin UI
-app.use('/adventures', express.static(ADV_DIR)); // serves adventure images
+app.use(express.static(REPO));                 // serves entire repo from root
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
