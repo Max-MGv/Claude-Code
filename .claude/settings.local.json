@@ -14,7 +14,10 @@
       "Bash(node server.js)",
       "Bash(node -e ' *)",
       "Bash(curl -s http://localhost:3001/api/adventures)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "WebFetch(domain:plugins.javalent.com)",
+      "Bash(\" \"C:/Users/Max/Desktop/Claude Code/_source/statue-heist/Statue Heist.md\" | head -30)",
+      "Bash(grep -rn \"statblock\\\\|```\" \"C:/Users/Max/Desktop/Claude Code/_source/statue-heist/Statue Heist.md\" | head -30)"
     ]
   }
 }

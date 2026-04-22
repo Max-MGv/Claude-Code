@@ -144,24 +144,33 @@ hr.divider {
 /* ── READ-ALOUD BLOCK ── */
 
 .read-aloud {
-  background: var(--parchment-dark);
-  border-left: 4px solid var(--ink-light);
-  padding: 0.85rem 1.1rem;
-  margin: 0.8rem 0;
+  background: #1a2740;
+  border: 1px solid #2e4a7a;
+  border-left: 4px solid var(--gold-light);
+  padding: 1.1rem 1.4rem;
+  margin: 1rem 0;
   font-style: italic;
-  font-size: 0.9rem;
-  line-height: 1.7;
-  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #e8dfc8;
   border-radius: 0 4px 4px 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
+
+.read-aloud p,
+.read-aloud li,
+.read-aloud em,
+.read-aloud span { color: #e8dfc8; }
+
+.read-aloud strong { color: var(--gold-light); }
 
 .read-aloud .ra-label {
   font-style: normal;
   font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--ink-light);
-  margin-bottom: 0.4rem;
+  letter-spacing: 0.12em;
+  color: var(--gold-light);
+  margin-bottom: 0.5rem;
   font-weight: bold;
 }
 

@@ -178,6 +178,94 @@
     scheduleImgPreviewHide();
   });
 
+  // ── STATBLOCK RENDERER (reads window.AdventureCreatures) ──
+  // Must run before wiki-link hover preview setup so the replaced DOM nodes
+  // already exist when event listeners are attached below.
+  (function renderCreatures() {
+    const creatures = window.AdventureCreatures;
+    if (!creatures || !creatures.length) return;
+
+    // Helper fns
+    const cap  = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+    const sl   = s => String(s || '').replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+    const fmtSaves = arr => !arr || !arr.length ? '' :
+      arr.map(o => { const [k,v] = Object.entries(o)[0]; return `${cap(k.slice(0,3))} ${v}`; }).join(', ');
+    const fmtSkills = arr => !arr || !arr.length ? '' :
+      arr.map(o => `${sl(o.name||'')} ${o.desc||''}`.trim()).join(', ');
+    const fmtActions = arr => !arr || !arr.length ? '' :
+      arr.map(o => `<div class="sb-action"><span class="sb-action-name">${o.name||''}.</span> ${sl(o.desc||'')}</div>`).join('');
+
+    function sbHtml(d) {
+      if (!d) return '';
+      const typeLine = [cap(d.size||''), (d.type||'') + (d.subtype ? ` (${d.subtype})` : ''), d.alignment||''].filter(Boolean).join(', ');
+      const ac  = d.ac || '—';
+      const acC = d.ac_class ? ` (${sl(d.ac_class)})` : '';
+      const hp  = d.hp || '—';
+      const hd  = d.hit_dice ? ` (${d.hit_dice})` : '';
+      const ABILS = ['STR','DEX','CON','INT','WIS','CHA'];
+      const stats = (d.stats || [10,10,10,10,10,10]).map(s => parseInt(s,10));
+      const abils = ABILS.map((a,i) => {
+        const sc = stats[i]||10, mod = Math.floor((sc-10)/2);
+        return `<div class="sb-ability"><span>${a}</span><span>${sc} (${mod>=0?'+'+mod:mod})</span></div>`;
+      }).join('');
+      const saves  = fmtSaves(d.saves);
+      const skills = fmtSkills(d.skillsaves);
+      const props2 = [
+        saves  ? `<div class="sb-prop"><span class="sb-prop-label">Saving Throws</span> ${saves}</div>` : '',
+        skills ? `<div class="sb-prop"><span class="sb-prop-label">Skills</span> ${skills}</div>` : '',
+        d['damage-resistances']  ? `<div class="sb-prop"><span class="sb-prop-label">Damage Resistances</span> ${d['damage-resistances']}</div>` : '',
+        d['damage-immunities']   ? `<div class="sb-prop"><span class="sb-prop-label">Damage Immunities</span> ${d['damage-immunities']}</div>` : '',
+        d['condition-immunities']? `<div class="sb-prop"><span class="sb-prop-label">Condition Immunities</span> ${d['condition-immunities']}</div>` : '',
+        d.senses    ? `<div class="sb-prop"><span class="sb-prop-label">Senses</span> ${d.senses}</div>` : '',
+        d.languages ? `<div class="sb-prop"><span class="sb-prop-label">Languages</span> ${d.languages}</div>` : '',
+        d.cr        ? `<div class="sb-prop"><span class="sb-prop-label">Challenge</span> ${d.cr}</div>` : '',
+      ].join('');
+      const traits  = fmtActions(d.traits);
+      const actions = fmtActions(d.actions);
+      const bonus   = d['bonus-actions'] ? `<div class="sb-section-title">Bonus Actions</div>${fmtActions(d['bonus-actions'])}` : '';
+      const react   = d.reactions       ? `<div class="sb-section-title">Reactions</div>${fmtActions(d.reactions)}`       : '';
+      const leg     = d['legendary-actions'] ? `<div class="sb-section-title">Legendary Actions</div>${fmtActions(d['legendary-actions'])}` : '';
+      const lore    = d._lore ? `<div class="sb-lore"><p>${d._lore.trim().replace(/\n\n+/g,'</p><p>')}</p></div>` : '';
+      return `<div class="statblock">
+  <div class="sb-name">${d.name||'Unknown'}</div>
+  <div class="sb-type">${typeLine}</div>
+  <hr class="sb-divider">
+  <div class="sb-props">
+    <div class="sb-prop"><span class="sb-prop-label">Armor Class</span> ${ac}${acC}</div>
+    <div class="sb-prop"><span class="sb-prop-label">Hit Points</span> ${hp}${hd}</div>
+    <div class="sb-prop"><span class="sb-prop-label">Speed</span> ${d.speed||'—'}</div>
+  </div>
+  <div class="sb-abilities">${abils}</div>
+  <hr class="sb-divider">
+  <div class="sb-props">${props2}</div>
+  ${traits  ? `<hr class="sb-divider">${traits}` : ''}
+  ${actions ? `<div class="sb-section-title">Actions</div>${actions}` : ''}
+  ${bonus}${react}${leg}
+</div>${lore}`;
+    }
+
+    // Expose sbHtml for the combat tracker hover popup
+    window._sbHtml = sbHtml;
+
+    // Replace build-generated monster entries in the Misc section
+    document.querySelectorAll('.misc-tag-monster').forEach(tag => tag.closest('.misc-entry')?.remove());
+
+    const miscBody = document.querySelector('#misc .section-body');
+    if (miscBody) {
+      const frag = document.createDocumentFragment();
+      [...creatures].reverse().forEach(c => {
+        const entry = document.createElement('details');
+        entry.className = 'misc-entry';
+        entry.id = `misc-${(c.name||'').replace(/[^a-z0-9]/gi,'-').toLowerCase()}`;
+        entry.dataset.previewTitle = c.name || '';
+        entry.dataset.previewBody  = `${cap(c.size||'')} ${c.type||''}, CR ${c.cr||'?'}`.trim();
+        entry.innerHTML = `<summary class="misc-summary"><span class="misc-tag misc-tag-monster">Monster</span> ${c.name||''}</summary><div class="misc-content">${sbHtml(c)}</div>`;
+        frag.prepend ? frag.appendChild(entry) : frag.appendChild(entry);
+      });
+      miscBody.insertBefore(frag, miscBody.firstChild);
+    }
+  })();
+
   // ── WIKI LINK HOVER PREVIEW ──
   // Reads data-preview-title and data-preview-body from the target misc-entry.
   // Shows a floating tooltip on mouseenter, removes on mouseleave.
@@ -192,47 +280,43 @@
 
   function cancelTooltipHide() { clearTimeout(tooltipHideTimer); }
 
-  document.querySelectorAll('a.wiki-link[href]').forEach(link => {
-    link.addEventListener('mouseenter', e => {
+  // Delegated — works on any a.wiki-link added to the DOM at any time
+  document.addEventListener('mouseover', e => {
+    const link = e.target.closest('a.wiki-link[href]');
+    if (link) {
       cancelTooltipHide();
       const href = link.getAttribute('href');
       if (!href || !href.startsWith('#')) return;
-
       const target = document.getElementById(href.slice(1));
       if (!target) return;
 
-      const title = target.dataset.previewTitle || target.querySelector('.sb-name, .npc-name, h2')?.textContent || href.slice(1);
-      const tag   = target.querySelector('.misc-tag')?.textContent?.trim() || '';
+      const title     = target.dataset.previewTitle || target.querySelector('.sb-name, .npc-name, h2')?.textContent || href.slice(1);
+      const tag       = target.querySelector('.misc-tag')?.textContent?.trim() || '';
       const contentEl = target.querySelector('.misc-content');
 
+      if (activeTooltip) activeTooltip.remove();
       activeTooltip = document.createElement('div');
       activeTooltip.className = 'link-preview';
       activeTooltip.innerHTML =
         `<div class="lp-header"><span class="lp-title">${escapeHtml(title)}</span>${tag ? `<span class="lp-tag">${escapeHtml(tag)}</span>` : ''}</div>` +
         (contentEl ? `<div class="lp-content">${contentEl.innerHTML}</div>` : '');
-
       document.body.appendChild(activeTooltip);
       positionTooltip(activeTooltip, e);
-    });
-
-    link.addEventListener('mousemove', e => {
-      if (activeTooltip) positionTooltip(activeTooltip, e);
-    });
-
-    link.addEventListener('mouseleave', e => {
-      if (!activeTooltip) return;
-      scheduleTooltipHide();
-    });
-  });
-
-  // Cancel hide when mouse enters the tooltip; dismiss when it leaves
-  document.addEventListener('mouseover', e => {
+      return;
+    }
     if (e.target.closest('.link-preview')) cancelTooltipHide();
   });
+
+  document.addEventListener('mousemove', e => {
+    if (activeTooltip && e.target.closest('a.wiki-link[href]')) positionTooltip(activeTooltip, e);
+  });
+
   document.addEventListener('mouseout', e => {
     if (!activeTooltip) return;
-    if (!e.target.closest('.link-preview')) return;
-    if (e.relatedTarget?.closest('.link-preview, a.wiki-link')) return;
+    const leavingLink    = e.target.closest('a.wiki-link[href]');
+    const leavingTooltip = e.target.closest('.link-preview');
+    if (!leavingLink && !leavingTooltip) return;
+    if (e.relatedTarget?.closest('.link-preview, a.wiki-link[href]')) return;
     scheduleTooltipHide();
   });
 
@@ -430,6 +514,388 @@
       document.body.appendChild(overlay);
     });
   });
+
+  // ── NOTES PANEL ──
+  const notesPanel = document.getElementById('notes-panel');
+  if (notesPanel) {
+    const advId = window.location.pathname.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    const KEY   = `dm-notes-${advId}`;
+
+    // ── Scratchpad ──
+    const scratch = document.getElementById('notes-scratchpad');
+    if (scratch) {
+      scratch.value = localStorage.getItem(`${KEY}-scratchpad`) || '';
+      scratch.addEventListener('input', () => localStorage.setItem(`${KEY}-scratchpad`, scratch.value));
+    }
+
+    // ── Combat tracker ──
+    const combatContainer = document.getElementById('notes-combat');
+    const sbPopup         = document.getElementById('sb-popup');
+
+    let sbHideTimer = null;
+    const scheduleSbHide = () => { sbHideTimer = setTimeout(() => { if (sbPopup) sbPopup.style.display = 'none'; }, 150); };
+    const cancelSbHide   = () => clearTimeout(sbHideTimer);
+
+    if (sbPopup) {
+      sbPopup.addEventListener('mouseenter', cancelSbHide);
+      sbPopup.addEventListener('mouseleave', scheduleSbHide);
+    }
+
+    // Build combatant data from window.AdventureCreatures
+    const combatants = [];
+    (window.AdventureCreatures || []).forEach(c => {
+      const name = c.name || 'Unknown';
+      const slug = name.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+      const cKey = `${KEY}-combat-${slug}`;
+      const ac    = String(c.ac || '—');
+      const maxHp = parseInt(c.hp) || 0;
+
+      // Build a detached DOM node for the hover popup
+      const tmp = document.createElement('div');
+      tmp.innerHTML = (window._sbHtml || (() => ''))(c);
+      const sb = tmp.firstChild || tmp;
+
+      const saved = JSON.parse(localStorage.getItem(cKey) || '{}');
+      const resolvedAc    = saved.ac    !== undefined ? saved.ac    : ac;
+      const resolvedMaxHp = saved.maxHp !== undefined ? saved.maxHp : maxHp;
+      combatants.push({
+        name, slug, sb, cKey,
+        baseAc: ac, baseMaxHp: maxHp,
+        ac:          resolvedAc,
+        maxHp:       resolvedMaxHp,
+        curHp:       saved.hp    !== undefined ? saved.hp    : resolvedMaxHp,
+        init:        saved.init  !== undefined ? saved.init  : '',
+        inCombat:    saved.inCombat  || false,
+        displayName: saved.displayName || '',
+      });
+    });
+
+    // ── Players ──
+    const PLAYERS_KEY = `${KEY}-players`;
+    let players = JSON.parse(localStorage.getItem(PLAYERS_KEY) || '[]');
+
+    function savePlayers() {
+      localStorage.setItem(PLAYERS_KEY, JSON.stringify(players));
+    }
+
+    function saveCombatant(c) {
+      localStorage.setItem(c.cKey, JSON.stringify({
+        hp: c.curHp, init: c.init, inCombat: c.inCombat,
+        ac: c.ac, maxHp: c.maxHp, displayName: c.displayName,
+      }));
+    }
+
+    function renderCombat() {
+      if (!combatContainer) return;
+      combatContainer.innerHTML = '';
+
+      const all = [...combatants, ...players];
+      const inCombat  = all.filter(c =>  c.inCombat).sort((a, b) => (Number(b.init) || 0) - (Number(a.init) || 0));
+      const outCombat = combatants.filter(c => !c.inCombat);
+
+      // ── Reset initiative ──
+      const resetAllBtn = document.createElement('button');
+      resetAllBtn.id = 'combat-reset-all';
+      resetAllBtn.textContent = '↺ Reset Initiative';
+      resetAllBtn.addEventListener('click', () => {
+        [...combatants, ...players].forEach(c => {
+          c.inCombat = false; c.init = '';
+          if (c.isPlayer) {
+            c.curHp = c.maxHp;
+          } else {
+            c.ac = c.baseAc; c.maxHp = c.baseMaxHp;
+            c.curHp = c.baseMaxHp; c.displayName = '';
+            localStorage.removeItem(c.cKey);
+          }
+        });
+        savePlayers();
+        renderCombat();
+      });
+      combatContainer.appendChild(resetAllBtn);
+
+      if (inCombat.length) {
+        const header = document.createElement('div');
+        header.className = 'combat-table-header';
+        ['', '⚄  Name', '♡', '⛨'].forEach((label, i) => {
+          const cell = document.createElement('span');
+          cell.textContent = label;
+          header.appendChild(cell);
+        });
+        combatContainer.appendChild(header);
+        inCombat.forEach(c => combatContainer.appendChild(buildCombatRow(c)));
+      }
+
+      // ── Roster ──
+      const rosterHeader = document.createElement('div');
+      rosterHeader.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin:0.8rem 0 0.4rem;';
+
+      const rosterLabel = document.createElement('div');
+      rosterLabel.className = 'notes-label';
+      rosterLabel.style.margin = '0';
+      rosterLabel.textContent = 'Roster';
+      rosterHeader.appendChild(rosterLabel);
+
+      const addPlayerBtn = document.createElement('button');
+      addPlayerBtn.className = 'combat-add-player-btn';
+      addPlayerBtn.textContent = '+ Player';
+      addPlayerBtn.addEventListener('click', () => {
+        players.push({ name: '', ac: '—', maxHp: 0, curHp: 0, init: '0', inCombat: true, isPlayer: true, id: Date.now() });
+        savePlayers();
+        renderCombat();
+      });
+      rosterHeader.appendChild(addPlayerBtn);
+
+      combatContainer.appendChild(rosterHeader);
+      outCombat.forEach(c => combatContainer.appendChild(buildCombatRow(c)));
+    }
+
+    function buildCombatRow(c) {
+      const save = () => c.isPlayer ? savePlayers() : saveCombatant(c);
+
+      const row = document.createElement('div');
+      row.className = `combat-row${c.inCombat ? ' in-combat' : ''}${c.isPlayer ? ' is-player' : ''}`;
+
+      // ── Roster-only row (monster not in combat) ──
+      if (!c.inCombat) {
+        const addBtn = document.createElement('button');
+        addBtn.className = 'combat-hp-btn';
+        addBtn.textContent = '+';
+        addBtn.title = 'Add to combat';
+        addBtn.addEventListener('click', () => { c.inCombat = true; save(); renderCombat(); });
+        row.appendChild(addBtn);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'combat-name';
+        nameSpan.style.cssText = 'margin:0;cursor:default;flex:1;';
+        nameSpan.textContent = c.name;
+        nameSpan.addEventListener('mouseenter', e => {
+          cancelSbHide();
+          if (!sbPopup) return;
+          const miscContent = document.querySelector(`#misc-${c.slug} .misc-content`);
+          sbPopup.innerHTML = miscContent ? miscContent.innerHTML : c.sb.outerHTML;
+          sbPopup.style.display = 'block';
+          sbPopup.style.top = Math.min(e.clientY, window.innerHeight - 300) + 'px';
+        });
+        nameSpan.addEventListener('mouseleave', scheduleSbHide);
+        row.appendChild(nameSpan);
+        return row;
+      }
+
+      // ── In-combat row: grid [init | name | HP | AC] ──
+
+      // Col 1: initiative
+      const initInput = document.createElement('input');
+      initInput.className = 'combat-init-input';
+      initInput.type = 'number';
+      initInput.placeholder = '0';
+      initInput.value = c.init !== '' ? c.init : '0';
+      initInput.title = 'Initiative';
+      initInput.addEventListener('change', () => { c.init = initInput.value; save(); renderCombat(); });
+      row.appendChild(initInput);
+
+      // Col 2: name (with tiny remove button inside)
+      const nameCol = document.createElement('div');
+      nameCol.className = 'combat-name-col';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'combat-remove-btn';
+      removeBtn.textContent = '×';
+      removeBtn.title = 'Remove from combat';
+      removeBtn.addEventListener('click', () => {
+        c.inCombat = false; c.init = '';
+        if (c.isPlayer) {
+          c.curHp = c.maxHp;
+        } else {
+          c.ac = c.baseAc; c.maxHp = c.baseMaxHp;
+          c.curHp = c.baseMaxHp; c.displayName = '';
+          localStorage.removeItem(c.cKey);
+        }
+        save(); renderCombat();
+      });
+      nameCol.appendChild(removeBtn);
+
+      if (c.isPlayer) {
+        const makeNameInput = () => {
+          const inp = document.createElement('input');
+          inp.className = 'combat-name-input';
+          inp.placeholder = 'Player name';
+          inp.value = c.name;
+          inp.style.flex = '1';
+          inp.addEventListener('input', () => { c.name = inp.value; save(); });
+          inp.addEventListener('blur', () => { if (c.name.trim()) renderCombat(); });
+          inp.addEventListener('keydown', e => { if (e.key === 'Enter' && c.name.trim()) renderCombat(); });
+          return inp;
+        };
+
+        if (!c.name.trim()) {
+          nameCol.appendChild(makeNameInput());
+        } else {
+          const nameText = document.createElement('span');
+          nameText.className = 'combat-name-text';
+          nameText.textContent = c.name;
+          nameText.title = 'Click to rename';
+          nameText.addEventListener('click', () => { const inp = makeNameInput(); nameText.replaceWith(inp); inp.focus(); });
+          nameCol.appendChild(nameText);
+        }
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'combat-remove-btn';
+        delBtn.textContent = '✕';
+        delBtn.title = 'Delete player';
+        delBtn.style.marginLeft = 'auto';
+        delBtn.addEventListener('click', () => { players = players.filter(p => p.id !== c.id); savePlayers(); renderCombat(); });
+        nameCol.appendChild(delBtn);
+      } else {
+        const nameText = document.createElement('span');
+        nameText.className = 'combat-name-text';
+        nameText.textContent = c.displayName || c.name;
+        nameText.title = 'Click to rename / hover for statblock';
+        nameText.addEventListener('mouseenter', e => {
+          cancelSbHide();
+          if (!sbPopup) return;
+          const miscContent = document.querySelector(`#misc-${c.slug} .misc-content`);
+          sbPopup.innerHTML = miscContent ? miscContent.innerHTML : c.sb.outerHTML;
+          sbPopup.style.display = 'block';
+          sbPopup.style.top = Math.min(e.clientY, window.innerHeight - 300) + 'px';
+        });
+        nameText.addEventListener('mouseleave', scheduleSbHide);
+        nameText.addEventListener('click', () => {
+          const inp = document.createElement('input');
+          inp.className = 'combat-name-input';
+          inp.value = c.displayName || c.name;
+          inp.style.flex = '1';
+          nameText.replaceWith(inp);
+          if (sbPopup) sbPopup.style.display = 'none';
+          inp.focus();
+          const apply = () => { c.displayName = inp.value.trim() || c.name; save(); renderCombat(); };
+          inp.addEventListener('blur', apply);
+          inp.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); });
+        });
+        nameCol.appendChild(nameText);
+      }
+
+      row.appendChild(nameCol);
+
+      // Col 3: HP  (editable current / click-max to edit)
+      const hpClass = () => c.curHp <= 0 ? 'hp-dead' : c.curHp < c.maxHp * 0.3 ? 'hp-low' : '';
+
+      const hpCol = document.createElement('div');
+      hpCol.className = 'combat-hp-col';
+
+      const curHpDisplay = document.createElement('span');
+      const refreshHpDisplay = () => {
+        curHpDisplay.textContent = c.curHp;
+        curHpDisplay.className = `combat-cur-hp-display ${hpClass()}`;
+      };
+      refreshHpDisplay();
+      curHpDisplay.title = 'Click to apply damage / healing';
+      curHpDisplay.addEventListener('click', () => {
+        const inp = document.createElement('input');
+        inp.type = 'number';
+        inp.className = 'combat-cur-hp-input';
+        inp.placeholder = 'dmg';
+        inp.title = 'Positive = damage, negative = heal. Enter to apply.';
+        curHpDisplay.replaceWith(inp);
+        inp.focus();
+        const apply = () => {
+          const v = parseInt(inp.value);
+          if (!isNaN(v)) { c.curHp = Math.max(0, c.curHp - v); save(); }
+          inp.replaceWith(curHpDisplay);
+          refreshHpDisplay();
+        };
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); if (e.key === 'Escape') { inp.replaceWith(curHpDisplay); } });
+        inp.addEventListener('blur', apply);
+      });
+      hpCol.appendChild(curHpDisplay);
+
+      const hpSep = document.createElement('span');
+      hpSep.textContent = '/';
+      hpSep.className = 'combat-hp-sep';
+      hpCol.appendChild(hpSep);
+
+      const maxHpSpan = document.createElement('span');
+      maxHpSpan.className = 'combat-max-hp';
+      maxHpSpan.textContent = c.maxHp;
+      maxHpSpan.title = 'Click to edit max HP';
+      maxHpSpan.addEventListener('click', () => {
+        const inp = document.createElement('input');
+        inp.type = 'number';
+        inp.className = 'combat-cur-hp-input';
+        inp.style.width = '30px';
+        inp.value = c.maxHp;
+        maxHpSpan.replaceWith(inp);
+        inp.focus();
+        const apply = () => {
+          const v = parseInt(inp.value);
+          if (!isNaN(v) && v > 0) { c.maxHp = v; if (c.curHp > v) c.curHp = v; }
+          save(); renderCombat();
+        };
+        inp.addEventListener('blur', apply);
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); });
+      });
+      hpCol.appendChild(maxHpSpan);
+      row.appendChild(hpCol);
+
+      // Col 4: AC (click to edit)
+      const acSpan = document.createElement('span');
+      acSpan.className = 'combat-ac-cell';
+      acSpan.textContent = c.ac;
+      acSpan.title = 'Click to edit AC';
+      acSpan.addEventListener('click', () => {
+        const inp = document.createElement('input');
+        inp.className = 'combat-cur-hp-input';
+        inp.style.width = '28px';
+        inp.value = c.ac;
+        acSpan.replaceWith(inp);
+        inp.focus();
+        const apply = () => { c.ac = inp.value || c.ac; save(); renderCombat(); };
+        inp.addEventListener('blur', apply);
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); });
+      });
+      row.appendChild(acSpan);
+
+      return row;
+    }
+
+    renderCombat();
+
+    // ── Resizable panel ──
+    const resizeHandle = document.getElementById('notes-resize-handle');
+    const mainEl = document.getElementById('main');
+    if (resizeHandle) {
+      const WIDTH_KEY = `dm-notes-panel-width`;
+      const MIN_W = 220;
+      let resizing = false, maxW = MIN_W;
+
+      const savedW = parseInt(localStorage.getItem(WIDTH_KEY));
+      if (savedW && savedW >= MIN_W) notesPanel.style.width = savedW + 'px';
+
+      resizeHandle.addEventListener('mousedown', e => {
+        resizing = true;
+        // Capture how far the panel can grow before its left edge hits the content's right edge
+        maxW = mainEl
+          ? window.innerWidth - mainEl.getBoundingClientRect().right
+          : window.innerWidth - 310;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (!resizing) return;
+        const w = Math.max(MIN_W, Math.min(maxW, window.innerWidth - e.clientX));
+        notesPanel.style.width = w + 'px';
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (!resizing) return;
+        resizing = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        localStorage.setItem(WIDTH_KEY, parseInt(notesPanel.style.width));
+      });
+    }
+  }
 
   function escapeHtml(str) {
     return String(str)

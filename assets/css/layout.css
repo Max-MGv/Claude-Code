@@ -32,6 +32,18 @@ body {
   text-align: center;
 }
 
+.sidebar-home {
+  display: block;
+  font-size: 0.7rem;
+  color: #7a5a30;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.6rem;
+  transition: color 0.15s;
+}
+
+.sidebar-home:hover { color: var(--gold-light); }
+
 #sidebar-header .title {
   font-size: 1.05rem;
   font-weight: bold;
@@ -86,9 +98,416 @@ body {
 /* ── MAIN CONTENT COLUMN ── */
 #main {
   margin-left: 230px;
+  margin-right: 280px;
   flex: 1;
-  padding: 2.5rem 2rem 4rem 2.5rem;
   max-width: 960px;
+  padding: 2.5rem 2.5rem 4rem;
+}
+
+/* ── NOTES PANEL ── */
+#notes-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100vh;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  border-left: 3px solid var(--gold);
+  box-shadow: -4px 0 18px rgba(0,0,0,0.6);
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.notes-header {
+  background: var(--page-bg);
+  padding: 1.2rem 1rem 0.8rem;
+  border-bottom: 2px solid var(--gold);
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  text-align: center;
+}
+
+#notes-resize-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 5px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+  transition: background 0.15s;
+}
+
+#notes-resize-handle:hover { background: rgba(160, 120, 48, 0.35); }
+
+.notes-section {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid rgba(160, 120, 48, 0.25);
+}
+
+.notes-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #7a5a30;
+  margin-bottom: 0.5rem;
+}
+
+#notes-scratchpad {
+  width: 100%;
+  min-height: 140px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(160,120,48,0.3);
+  border-radius: 3px;
+  color: var(--sidebar-text);
+  font-family: 'Georgia', serif;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  padding: 0.5rem;
+  resize: vertical;
+}
+
+#notes-scratchpad:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+#notes-scratchpad::placeholder { color: #4a3a20; }
+
+.notes-npc-row {
+  margin-bottom: 0.8rem;
+}
+
+.notes-npc-name {
+  font-size: 0.78rem;
+  color: #d4b88a;
+  margin-bottom: 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notes-npc-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.notes-pill {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+  border: 1px solid #444;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all 0.15s;
+}
+
+.notes-pill--alive.active   { background: #1a4a2a; border-color: #2a7a42; color: #7dda8a; }
+.notes-pill--dead.active    { background: #4a1a1a; border-color: #8b2a2a; color: #dd8a8a; }
+.notes-pill--allied.active  { background: #1a3a5c; border-color: #2a5a9c; color: #8ab4dd; }
+.notes-pill--hostile.active { background: #4a2a1a; border-color: #8b4a2a; color: #ddaa8a; }
+
+.npc-status--dead    { opacity: 0.55; filter: grayscale(0.6); }
+.npc-status--allied  { box-shadow: 0 0 0 2px #2a5a9c; }
+.npc-status--hostile { box-shadow: 0 0 0 2px #8b2a2a; }
+
+/* ── NOTES TABS ── */
+.notes-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--gold);
+}
+
+.notes-tab {
+  flex: 1;
+  padding: 0.5rem 0;
+  background: transparent;
+  border: none;
+  color: #7a5a30;
+  font-size: 0.72rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.notes-tab.active {
+  color: var(--gold-light);
+  background: rgba(160,120,48,0.1);
+}
+
+.notes-tab-content { display: none; }
+.notes-tab-content.active { display: block; }
+
+/* ── COMBAT TRACKER ── */
+
+/* Roster rows */
+.combat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.4rem;
+  border-radius: 3px;
+}
+
+.combat-row:hover { background: rgba(255,255,255,0.04); }
+
+/* In-combat rows: 4-column grid */
+.combat-row.in-combat {
+  display: grid;
+  grid-template-columns: 26px 1fr 58px 26px;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.42rem 0.4rem;
+  border-radius: 3px;
+}
+
+/* Column header row */
+.combat-table-header {
+  display: grid;
+  grid-template-columns: 26px 1fr 58px 26px;
+  gap: 0.35rem;
+  padding: 0.3rem 0.4rem 0.4rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 0.15rem;
+}
+
+.combat-table-header span {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.65);
+  text-align: center;
+}
+
+.combat-table-header span:nth-child(2) { text-align: left; }
+
+/* Shared roster name */
+.combat-name {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+/* Name column (in-combat) */
+.combat-name-col {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.combat-name-text {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.88);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.combat-name-text:hover { color: #fff; }
+
+/* Remove/delete buttons — invisible until row hover */
+.combat-remove-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.55);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  width: 16px;
+  text-align: center;
+  transition: color 0.1s;
+}
+
+.combat-remove-btn:hover { color: #dd8a8a; }
+
+/* HP column */
+.combat-hp-col {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  justify-content: flex-end;
+}
+
+/* Current HP — transparent input, looks like plain text */
+.combat-cur-hp-input {
+  width: 26px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.88);
+  font-size: 0.82rem;
+  text-align: right;
+  padding: 0;
+  font-family: inherit;
+}
+
+.combat-cur-hp-input:focus {
+  outline: none;
+  background: rgba(255,255,255,0.07);
+  border-radius: 2px;
+}
+
+/* Hide number spinners */
+.combat-cur-hp-input::-webkit-outer-spin-button,
+.combat-cur-hp-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.combat-cur-hp-input[type=number] { -moz-appearance: textfield; }
+
+.combat-cur-hp-display {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.88);
+  font-family: inherit;
+  cursor: pointer;
+  min-width: 20px;
+  text-align: right;
+}
+
+.combat-cur-hp-display:hover { color: #fff; }
+.combat-cur-hp-display.hp-dead { color: #dd8a8a; }
+.combat-cur-hp-display.hp-low  { color: #ddaa66; }
+.combat-cur-hp-input.hp-dead { color: #dd8a8a; }
+.combat-cur-hp-input.hp-low  { color: #ddaa66; }
+
+.combat-hp-sep { color: rgba(255,255,255,0.2); font-size: 0.78rem; margin: 0 1px; }
+
+.combat-max-hp {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  min-width: 16px;
+  text-align: left;
+}
+
+.combat-max-hp:hover { color: rgba(255,255,255,0.6); }
+
+/* AC column */
+.combat-ac-cell {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.88);
+  text-align: center;
+  cursor: pointer;
+  display: block;
+}
+
+.combat-ac-cell:hover { color: #fff; }
+
+/* Initiative input — transparent, looks like a bold number */
+.combat-init-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-align: center;
+  padding: 0;
+  font-family: inherit;
+}
+
+.combat-init-input:focus {
+  outline: none;
+  background: rgba(255,255,255,0.07);
+  border-radius: 2px;
+}
+
+.combat-init-input::-webkit-outer-spin-button,
+.combat-init-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.combat-init-input[type=number] { -moz-appearance: textfield; }
+
+/* Roster + button */
+.combat-hp-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 3px;
+  color: rgba(255,255,255,0.3);
+  font-size: 0.8rem;
+  width: 18px;
+  height: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: border-color 0.1s, color 0.1s;
+}
+
+.combat-hp-btn:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.7); }
+
+#combat-reset-all {
+  width: 100%;
+  background: rgba(120,40,40,0.15);
+  border: 1px dashed #8b3a3a;
+  color: #c07070;
+  border-radius: 3px;
+  padding: 0.3rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+#combat-reset-all:hover { background: rgba(140,40,40,0.3); color: #e09090; }
+
+.combat-add-player-btn {
+  background: transparent;
+  border: 1px dashed #a07830;
+  color: #a07830;
+  border-radius: 3px;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.68rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.combat-add-player-btn:hover { background: rgba(160,120,48,0.2); color: var(--gold-light); }
+
+.combat-name-input {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  color: #e8dfc8;
+  font-size: 0.8rem;
+  padding: 0.15rem 0.4rem;
+  width: 100%;
+  font-family: 'Georgia', serif;
+}
+
+.combat-name-input:focus { outline: none; }
+.combat-row.is-player { border-left-color: #8ab4dd; }
+
+/* ── STATBLOCK HOVER POPUP ── */
+#sb-popup {
+  position: fixed;
+  right: 284px;
+  top: 60px;
+  width: 340px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--parchment);
+  border: 2px solid var(--gold);
+  border-radius: 4px;
+  box-shadow: -4px 4px 20px rgba(0,0,0,0.6);
+  z-index: 300;
+  padding: 1rem;
+  display: none;
 }
 
 /* ── PAGE TITLE BLOCK ── */
@@ -186,9 +605,9 @@ body.homepage #main {
 
 .adventure-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.8rem;
-  margin-top: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
 }
 
 .adventure-card {
@@ -210,13 +629,13 @@ body.homepage #main {
 }
 
 .adventure-card-banner {
-  height: 140px;
+  height: 180px;
   background: var(--parchment-dark);
   border-bottom: 2px solid var(--gold);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
+  font-size: 3.5rem;
 }
 
 .adventure-card-banner img {
@@ -264,6 +683,18 @@ body.homepage #main {
 
 .adventure-card-meta .stat-pill {
   font-size: 0.72rem;
+}
+
+.adventure-card--placeholder {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+  border-style: dashed;
+}
+
+.adventure-card--placeholder .adventure-card-banner {
+  background: var(--page-bg);
+  filter: grayscale(1);
 }
 
 /* ── RESPONSIVE ── */
