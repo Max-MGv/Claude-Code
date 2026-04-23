@@ -132,6 +132,30 @@ body {
   text-transform: uppercase;
   color: var(--gold-light);
   text-align: center;
+  position: relative;
+}
+
+#notes-export-btn {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 1px solid rgba(160, 120, 48, 0.4);
+  border-radius: 3px;
+  color: rgba(255,255,255,0.45);
+  font-size: 0.65rem;
+  font-weight: normal;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+#notes-export-btn:hover {
+  color: var(--gold-light);
+  border-color: var(--gold);
 }
 
 #notes-resize-handle {
@@ -191,7 +215,7 @@ body {
 
 .notes-tab-pill-name {
   font-size: 0.82rem;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255,255,255,0.72);
   white-space: nowrap;
   max-width: 80px;
   overflow: hidden;
@@ -362,7 +386,7 @@ body {
 
 .combat-table-header span {
   font-size: 0.95rem;
-  color: rgba(255,255,255,0.65);
+  color: rgba(255,255,255,0.85);
   text-align: center;
 }
 
@@ -371,7 +395,7 @@ body {
 /* Shared roster name */
 .combat-name {
   font-size: 0.92rem;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.78);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -463,11 +487,11 @@ body {
 .combat-cur-hp-input.hp-dead { color: #dd8a8a; }
 .combat-cur-hp-input.hp-low  { color: #ddaa66; }
 
-.combat-hp-sep { color: rgba(255,255,255,0.2); font-size: 0.88rem; margin: 0 1px; }
+.combat-hp-sep { color: rgba(255,255,255,0.45); font-size: 0.88rem; margin: 0 1px; }
 
 .combat-max-hp {
   font-size: 0.92rem;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.58);
   cursor: pointer;
   min-width: 16px;
   text-align: left;
@@ -515,7 +539,7 @@ body {
   background: transparent;
   border: 1px solid rgba(255,255,255,0.15);
   border-radius: 3px;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.55);
   font-size: 0.8rem;
   width: 18px;
   height: 18px;

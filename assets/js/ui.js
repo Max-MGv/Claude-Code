@@ -616,6 +616,31 @@
       tabTextarea.value = loadContent(activeId);
       tabTextarea.addEventListener('input', () => saveContent(activeId, tabTextarea.value));
       renderTabs();
+
+      // ── Export Notes ──
+      const notesHeader = notesPanel.querySelector('.notes-header');
+      if (notesHeader) {
+        const exportBtn = document.createElement('button');
+        exportBtn.id = 'notes-export-btn';
+        exportBtn.textContent = '↓ Export';
+        exportBtn.title = 'Download all notes as a text file';
+        exportBtn.addEventListener('click', () => {
+          saveContent(activeId, tabTextarea.value);
+          const title = document.querySelector('#sidebar-header .title')?.textContent?.trim() || 'Adventure';
+          const date  = new Date().toLocaleDateString();
+          let out = `DM Notes — ${title}\nExported: ${date}\n`;
+          tabs.forEach(tab => {
+            out += `\n${'─'.repeat(36)}\n${tab.name}\n${'─'.repeat(36)}\n`;
+            out += loadContent(tab.id) || '(empty)';
+            out += '\n';
+          });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob([out], { type: 'text/plain' }));
+          a.download = `dm-notes-${advId}.txt`;
+          a.click();
+        });
+        notesHeader.appendChild(exportBtn);
+      }
     }
 
     // ── Combat tracker ──
