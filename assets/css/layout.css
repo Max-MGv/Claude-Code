@@ -781,6 +781,11 @@ body.homepage #main {
   display: none;
 }
 
+/* Prevent any overflowing content from causing the browser to zoom out */
+@media (max-width: 767px) {
+  html { overflow-x: hidden; }
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 767px) {
   /* Toggle buttons */

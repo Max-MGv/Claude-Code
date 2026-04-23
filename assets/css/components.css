@@ -1036,3 +1036,24 @@ hr.sb-divider {
   font-style: italic;
   pointer-events: none;
 }
+
+
+/* ── MOBILE FIXES ── */
+@media (max-width: 767px) {
+  /* Tables: scroll horizontally rather than stretching the page */
+  .styled-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Statblock: never exceed container width */
+  .statblock { max-width: 100%; }
+
+  /* Tooltips and previews: fit within viewport */
+  .link-preview { width: calc(100vw - 2rem); max-width: 360px; }
+  .term-tooltip { max-width: calc(100vw - 2rem); }
+
+  /* Section body: slightly tighter padding on small screens */
+  .section-body { padding: 1rem 1.1rem; }
+}
