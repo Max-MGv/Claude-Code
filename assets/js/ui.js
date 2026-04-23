@@ -521,11 +521,101 @@
     const advId = window.location.pathname.replace(/[^a-z0-9]/gi, '-').toLowerCase();
     const KEY   = `dm-notes-${advId}`;
 
-    // ── Scratchpad ──
-    const scratch = document.getElementById('notes-scratchpad');
-    if (scratch) {
-      scratch.value = localStorage.getItem(`${KEY}-scratchpad`) || '';
-      scratch.addEventListener('input', () => localStorage.setItem(`${KEY}-scratchpad`, scratch.value));
+    // ── Note Tabs ──
+    const tabsBar     = document.getElementById('notes-tabs-bar');
+    const tabTextarea = document.getElementById('notes-tab-textarea');
+
+    if (tabsBar && tabTextarea) {
+      const TABS_KEY   = `${KEY}-note-tabs`;
+      const ACTIVE_KEY = `${KEY}-note-active`;
+      const loadContent  = id  => localStorage.getItem(`${KEY}-note-tab-${id}`) || '';
+      const saveContent  = (id, v) => localStorage.setItem(`${KEY}-note-tab-${id}`, v);
+      const saveTabs     = () => localStorage.setItem(TABS_KEY, JSON.stringify(tabs));
+      const saveActiveId = id  => localStorage.setItem(ACTIVE_KEY, id);
+
+      let tabs     = JSON.parse(localStorage.getItem(TABS_KEY) || 'null') || [{ id: 'default', name: 'Session' }];
+      let activeId = localStorage.getItem(ACTIVE_KEY) || tabs[0].id;
+      if (!tabs.find(t => t.id === activeId)) activeId = tabs[0].id;
+
+      function switchTab(id) {
+        saveContent(activeId, tabTextarea.value);
+        activeId = id;
+        saveActiveId(id);
+        tabTextarea.value = loadContent(id);
+        renderTabs();
+      }
+
+      function startRename(tab, nameEl) {
+        const inp = document.createElement('input');
+        inp.className = 'notes-tab-rename';
+        inp.value = tab.name;
+        nameEl.replaceWith(inp);
+        inp.focus(); inp.select();
+        const apply = () => { tab.name = inp.value.trim() || tab.name; saveTabs(); renderTabs(); };
+        inp.addEventListener('blur', apply);
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); if (e.key === 'Escape') renderTabs(); });
+      }
+
+      function renderTabs() {
+        tabsBar.innerHTML = '';
+
+        tabs.forEach(tab => {
+          const pill = document.createElement('div');
+          pill.className = `notes-tab-pill${tab.id === activeId ? ' active' : ''}`;
+
+          const nameEl = document.createElement('span');
+          nameEl.className = 'notes-tab-pill-name';
+          nameEl.textContent = tab.name;
+          nameEl.addEventListener('click', () => { if (tab.id !== activeId) switchTab(tab.id); });
+          nameEl.addEventListener('dblclick', () => startRename(tab, nameEl));
+          pill.appendChild(nameEl);
+
+          if (tabs.length > 1) {
+            const del = document.createElement('button');
+            del.className = 'notes-tab-pill-del';
+            del.textContent = '×';
+            del.title = 'Delete tab';
+            del.addEventListener('click', e => {
+              e.stopPropagation();
+              saveContent(activeId, tabTextarea.value);
+              localStorage.removeItem(`${KEY}-note-tab-${tab.id}`);
+              tabs = tabs.filter(t => t.id !== tab.id);
+              saveTabs();
+              if (activeId === tab.id) {
+                activeId = tabs[0].id;
+                saveActiveId(activeId);
+                tabTextarea.value = loadContent(activeId);
+              }
+              renderTabs();
+            });
+            pill.appendChild(del);
+          }
+
+          tabsBar.appendChild(pill);
+        });
+
+        const addBtn = document.createElement('button');
+        addBtn.className = 'notes-tab-add';
+        addBtn.textContent = '+';
+        addBtn.title = 'New tab';
+        addBtn.addEventListener('click', () => {
+          saveContent(activeId, tabTextarea.value);
+          const id = `tab-${Date.now()}`;
+          tabs.push({ id, name: 'New' });
+          saveTabs();
+          activeId = id;
+          saveActiveId(id);
+          tabTextarea.value = '';
+          renderTabs();
+          const newName = tabsBar.querySelector('.notes-tab-pill.active .notes-tab-pill-name');
+          if (newName) startRename(tabs[tabs.length - 1], newName);
+        });
+        tabsBar.appendChild(addBtn);
+      }
+
+      tabTextarea.value = loadContent(activeId);
+      tabTextarea.addEventListener('input', () => saveContent(activeId, tabTextarea.value));
+      renderTabs();
     }
 
     // ── Combat tracker ──
@@ -797,13 +887,16 @@
         inp.title = 'Positive = damage, negative = heal. Enter to apply.';
         curHpDisplay.replaceWith(inp);
         inp.focus();
+        let applied = false;
         const apply = () => {
+          if (applied) return;
+          applied = true;
           const v = parseInt(inp.value);
           if (!isNaN(v)) { c.curHp = Math.max(0, c.curHp - v); save(); }
           inp.replaceWith(curHpDisplay);
           refreshHpDisplay();
         };
-        inp.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); if (e.key === 'Escape') { inp.replaceWith(curHpDisplay); } });
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); if (e.key === 'Escape') { applied = true; inp.replaceWith(curHpDisplay); } });
         inp.addEventListener('blur', apply);
       });
       hpCol.appendChild(curHpDisplay);
@@ -896,6 +989,49 @@
       });
     }
   }
+
+  // ── MOBILE PANEL TOGGLES ──
+  const sidebarToggle  = document.getElementById('sidebar-toggle');
+  const notesToggle    = document.getElementById('notes-toggle');
+  const mobileBackdrop = document.getElementById('mobile-backdrop');
+  const sidebar        = document.getElementById('sidebar');
+
+  function closeMobilePanels() {
+    if (sidebar)        sidebar.classList.remove('mobile-open');
+    if (notesPanel)     notesPanel.classList.remove('mobile-open');
+    if (mobileBackdrop) mobileBackdrop.classList.remove('active');
+  }
+
+  function openMobilePanel(panel) {
+    closeMobilePanels();
+    panel.classList.add('mobile-open');
+    if (mobileBackdrop) mobileBackdrop.classList.add('active');
+  }
+
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', () => {
+      if (sidebar.classList.contains('mobile-open')) closeMobilePanels();
+      else openMobilePanel(sidebar);
+    });
+  }
+
+  if (notesToggle && notesPanel) {
+    notesToggle.addEventListener('click', () => {
+      if (notesPanel.classList.contains('mobile-open')) closeMobilePanels();
+      else openMobilePanel(notesPanel);
+    });
+  }
+
+  if (mobileBackdrop) {
+    mobileBackdrop.addEventListener('click', closeMobilePanels);
+  }
+
+  // Auto-close sidebar after tapping a nav link on mobile
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 767) closeMobilePanels();
+    });
+  });
 
   function escapeHtml(str) {
     return String(str)

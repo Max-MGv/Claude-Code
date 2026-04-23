@@ -126,7 +126,7 @@ body {
   background: var(--page-bg);
   padding: 1.2rem 1rem 0.8rem;
   border-bottom: 2px solid var(--gold);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: bold;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -153,33 +153,111 @@ body {
 }
 
 .notes-label {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: #7a5a30;
   margin-bottom: 0.5rem;
 }
 
-#notes-scratchpad {
+/* ── NOTE TABS ── */
+#notes-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0.5rem 0.75rem 0;
+  flex-wrap: wrap;
+}
+
+.notes-tab-pill {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px 3px 0 0;
+  border: 1px solid transparent;
+  border-bottom: none;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.12s;
+}
+
+.notes-tab-pill:hover { background: rgba(255,255,255,0.05); }
+
+.notes-tab-pill.active {
+  background: rgba(0,0,0,0.25);
+  border-color: rgba(160,120,48,0.3);
+}
+
+.notes-tab-pill-name {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.notes-tab-pill.active .notes-tab-pill-name { color: var(--gold-light); }
+
+.notes-tab-pill-del {
+  background: transparent;
+  border: none;
+  color: transparent;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.1s;
+}
+
+.notes-tab-pill:hover .notes-tab-pill-del { color: rgba(255,255,255,0.25); }
+.notes-tab-pill-del:hover { color: #dd8a8a !important; }
+
+.notes-tab-add {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.25);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  transition: color 0.12s;
+}
+
+.notes-tab-add:hover { color: var(--gold-light); }
+
+.notes-tab-rename {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  color: #e8dfc8;
+  font-size: 0.82rem;
+  padding: 0.1rem 0.3rem;
+  width: 70px;
+  outline: none;
+}
+
+#notes-tabs-content {
+  border-top: 1px solid rgba(160,120,48,0.3);
+}
+
+#notes-tab-textarea {
   width: 100%;
   min-height: 140px;
   background: rgba(0,0,0,0.25);
-  border: 1px solid rgba(160,120,48,0.3);
-  border-radius: 3px;
+  border: none;
   color: var(--sidebar-text);
   font-family: 'Georgia', serif;
-  font-size: 0.8rem;
+  font-size: 0.92rem;
   line-height: 1.5;
   padding: 0.5rem;
   resize: vertical;
 }
 
-#notes-scratchpad:focus {
-  outline: none;
-  border-color: var(--gold);
-}
-
-#notes-scratchpad::placeholder { color: #4a3a20; }
+#notes-tab-textarea:focus { outline: none; }
+#notes-tab-textarea::placeholder { color: #4a3a20; }
 
 .notes-npc-row {
   margin-bottom: 0.8rem;
@@ -283,7 +361,7 @@ body {
 }
 
 .combat-table-header span {
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   color: rgba(255,255,255,0.65);
   text-align: center;
 }
@@ -292,7 +370,7 @@ body {
 
 /* Shared roster name */
 .combat-name {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   color: rgba(255,255,255,0.5);
   white-space: nowrap;
   overflow: hidden;
@@ -310,7 +388,7 @@ body {
 }
 
 .combat-name-text {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   color: rgba(255,255,255,0.88);
   cursor: pointer;
   white-space: nowrap;
@@ -328,7 +406,7 @@ body {
   background: transparent;
   border: none;
   color: rgba(255,255,255,0.55);
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   cursor: pointer;
   padding: 0;
   line-height: 1;
@@ -349,11 +427,11 @@ body {
 
 /* Current HP — transparent input, looks like plain text */
 .combat-cur-hp-input {
-  width: 26px;
+  width: 28px;
   background: transparent;
   border: none;
   color: rgba(255,255,255,0.88);
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   text-align: right;
   padding: 0;
   font-family: inherit;
@@ -371,7 +449,7 @@ body {
 .combat-cur-hp-input[type=number] { -moz-appearance: textfield; }
 
 .combat-cur-hp-display {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   color: rgba(255,255,255,0.88);
   font-family: inherit;
   cursor: pointer;
@@ -385,10 +463,10 @@ body {
 .combat-cur-hp-input.hp-dead { color: #dd8a8a; }
 .combat-cur-hp-input.hp-low  { color: #ddaa66; }
 
-.combat-hp-sep { color: rgba(255,255,255,0.2); font-size: 0.78rem; margin: 0 1px; }
+.combat-hp-sep { color: rgba(255,255,255,0.2); font-size: 0.88rem; margin: 0 1px; }
 
 .combat-max-hp {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   color: rgba(255,255,255,0.3);
   cursor: pointer;
   min-width: 16px;
@@ -399,7 +477,7 @@ body {
 
 /* AC column */
 .combat-ac-cell {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   color: rgba(255,255,255,0.88);
   text-align: center;
   cursor: pointer;
@@ -414,7 +492,7 @@ body {
   background: transparent;
   border: none;
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: bold;
   text-align: center;
   padding: 0;
@@ -459,7 +537,7 @@ body {
   color: #c07070;
   border-radius: 3px;
   padding: 0.3rem;
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
@@ -472,7 +550,7 @@ body {
   color: #a07830;
   border-radius: 3px;
   padding: 0.1rem 0.45rem;
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
@@ -484,7 +562,7 @@ body {
   border: 1px solid var(--gold);
   border-radius: 3px;
   color: #e8dfc8;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   padding: 0.15rem 0.4rem;
   width: 100%;
   font-family: 'Georgia', serif;
@@ -697,19 +775,96 @@ body.homepage #main {
   filter: grayscale(1);
 }
 
+/* ── MOBILE TOGGLE BUTTONS ── */
+#sidebar-toggle,
+#notes-toggle {
+  display: none;
+}
+
 /* ── RESPONSIVE ── */
-@media (max-width: 700px) {
-  #sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
+@media (max-width: 767px) {
+  /* Toggle buttons */
+  #sidebar-toggle,
+  #notes-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0.6rem;
+    z-index: 200;
+    width: 2.4rem;
+    height: 2.4rem;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    color: var(--gold-light);
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
   }
 
+  #sidebar-toggle { left: 0.6rem; }
+  #notes-toggle   { right: 0.6rem; }
+
+  /* Backdrop */
+  #mobile-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 99;
+  }
+
+  #mobile-backdrop.active { display: block; }
+
+  /* Sidebar: slide off left, overlay on open */
+  #sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 150;
+  }
+
+  #sidebar.mobile-open { transform: translateX(0); }
+
+  /* Notes panel: slide off right, overlay on open */
+  #notes-panel {
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    z-index: 150;
+    width: min(320px, 90vw) !important;
+  }
+
+  #notes-panel.mobile-open { transform: translateX(0); }
+
+  /* Main: fill screen, top padding for toggle buttons */
   #main {
     margin-left: 0;
+    margin-right: 0;
+    padding: 3.5rem 1.25rem 4rem;
   }
 
-  body {
-    flex-direction: column;
+  /* Hide resize handle — no drag-to-resize on touch */
+  #notes-resize-handle { display: none; }
+
+  /* Statblock popup: centre instead of fixed left-of-panel */
+  #sb-popup {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 360px;
   }
+
+  /* Adventure grid: single column */
+  .adventure-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* NPC grid: single column */
+  .npc-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Page title: smaller h1 so it doesn't wrap badly */
+  .page-title h1 { font-size: 1.8rem; }
 }

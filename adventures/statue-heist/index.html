@@ -10,6 +10,10 @@
 </head>
 <body>
 
+<button id="sidebar-toggle" aria-label="Open navigation">☰</button>
+<button id="notes-toggle" aria-label="Open DM notes">📋</button>
+<div id="mobile-backdrop"></div>
+
 <nav id="sidebar">
   <div id="sidebar-header">
     <a class="sidebar-home" href="../../index.html">← All Adventures</a>
@@ -1133,9 +1137,9 @@ Cantrips (at will): fire bolt, light, mage hand, prestidigitation
   <div id="notes-resize-handle"></div>
   <div class="notes-header">DM Notes</div>
 
-  <div class="notes-section">
-    <div class="notes-label">Session Scratchpad</div>
-    <textarea id="notes-scratchpad" placeholder="Notes, reminders, loot handed out..."></textarea>
+  <div id="notes-tabs-bar"></div>
+  <div class="notes-section" id="notes-tabs-content">
+    <textarea id="notes-tab-textarea" placeholder="Notes..."></textarea>
   </div>
 
   <div class="notes-section">
